@@ -3,7 +3,8 @@
 **Môn:** AI in Action (AICB-P1)  
 **Chủ đề:** Supervisor-Worker Pattern · MCP · Trace & Observability  
 **Thời gian:** 4 giờ (4 sprints x 60 phút)  
-**Tiếp nối:** Day 08 — RAG Pipeline → Day 09 — Orchestration Layer
+**Tiếp nối:** Day 08 — RAG Pipeline → Day 09 — Orchestration Layer  
+**Sinh viên:** 2A202600772 - Vũ Tuấn Phương
 
 ---
 

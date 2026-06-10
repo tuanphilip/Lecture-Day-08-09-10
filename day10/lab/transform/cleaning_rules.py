@@ -20,6 +20,7 @@ ALLOWED_DOC_IDS = frozenset(
         "sla_p1_2026",
         "it_helpdesk_faq",
         "hr_leave_policy",
+        "access_control_sop",
     }
 )
 
@@ -111,17 +112,35 @@ def clean_rows(
             )
             continue
 
+        # New Rule 1: rule_quarantine_stale_hr_leave_content
+        # Quarantine stale HR leave policy indicators (e.g. "10 ngày phép").
+        # Metric impact: quarantine_records increases by 9, prevents failing the hr_leave_no_stale_10d_annual expectation.
+        if doc_id == "hr_leave_policy" and "10 ngày phép" in text:
+            quarantine.append(
+                {
+                    **raw,
+                    "reason": "stale_hr_policy_text_10d",
+                }
+            )
+            continue
+
         if not text:
             quarantine.append({**raw, "reason": "missing_chunk_text"})
             continue
 
-        key = _norm_text(text)
-        if key in seen_text:
-            quarantine.append({**raw, "reason": "duplicate_chunk_text"})
-            continue
-        seen_text.add(key)
+        # New Rule 2: rule_clean_noise_prefixes
+        # Clean leading noise such as "!!!" or "Nội dung không rõ ràng: " from chunk_text.
+        # Metric impact: Cleans prefix noise for 15 records in policy_refund_v4, sla_p1_2026, and data_privacy_guideline.
+        fixed_text = text.replace("!!!", "")
+        if fixed_text.startswith("Nội dung không rõ ràng:"):
+            fixed_text = fixed_text.replace("Nội dung không rõ ràng:", "", 1).strip()
 
-        fixed_text = text
+        # New Rule 3: rule_clean_word_repetitions
+        # Replace duplicated stutter phrases like "làm việc làm việc" in chunk_text.
+        # Metric impact: Normalizes wording for 3 records in policy_refund_v4.
+        while "làm việc làm việc" in fixed_text:
+            fixed_text = fixed_text.replace("làm việc làm việc", "làm việc")
+
         if apply_refund_window_fix and doc_id == "policy_refund_v4":
             if "14 ngày làm việc" in fixed_text:
                 fixed_text = fixed_text.replace(
@@ -129,6 +148,12 @@ def clean_rows(
                     "7 ngày làm việc",
                 )
                 fixed_text += " [cleaned: stale_refund_window]"
+
+        key = _norm_text(fixed_text)
+        if key in seen_text:
+            quarantine.append({**raw, "reason": "duplicate_chunk_text"})
+            continue
+        seen_text.add(key)
 
         seq += 1
         cleaned.append(

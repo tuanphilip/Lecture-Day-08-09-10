@@ -112,5 +112,53 @@ def run_expectations(cleaned_rows: List[Dict[str, Any]]) -> Tuple[List[Expectati
         )
     )
 
+    # E7: no_invalid_prefixes (halt)
+    # Ensure cleaned text does not contain noisy prefixes like "!!!" or "Nội dung không rõ ràng:"
+    bad_prefixes = [
+        r for r in cleaned_rows
+        if "!!!" in (r.get("chunk_text") or "")
+        or "nội dung không rõ ràng:" in (r.get("chunk_text") or "").lower()
+    ]
+    ok7 = len(bad_prefixes) == 0
+    results.append(
+        ExpectationResult(
+            "no_invalid_prefixes",
+            ok7,
+            "halt",
+            f"violations={len(bad_prefixes)}",
+        )
+    )
+
+    # E8: expected_doc_ids_present (halt)
+    # Ensure all 5 valid documents have at least one record in cleaned rows
+    distinct_docs = {r.get("doc_id") for r in cleaned_rows}
+    expected_docs = {"policy_refund_v4", "sla_p1_2026", "it_helpdesk_faq", "hr_leave_policy", "access_control_sop"}
+    missing_docs = expected_docs - distinct_docs
+    ok8 = len(missing_docs) == 0
+    results.append(
+        ExpectationResult(
+            "expected_doc_ids_present",
+            ok8,
+            "halt",
+            f"missing_docs={list(missing_docs)}",
+        )
+    )
+
+    # E9: no_word_repetitions (warn)
+    # Warn if redundant word stuttering is detected (e.g. "làm việc làm việc")
+    bad_repeats = [
+        r for r in cleaned_rows
+        if "làm việc làm việc" in (r.get("chunk_text") or "")
+    ]
+    ok9 = len(bad_repeats) == 0
+    results.append(
+        ExpectationResult(
+            "no_word_repetitions",
+            ok9,
+            "warn",
+            f"violations={len(bad_repeats)}",
+        )
+    )
+
     halt = any(not r.passed and r.severity == "halt" for r in results)
     return results, halt

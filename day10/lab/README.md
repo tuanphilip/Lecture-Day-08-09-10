@@ -5,7 +5,8 @@
 **Thời gian:** 4 giờ (4 sprints × ~60 phút)  
 **Tiếp nối:** Day 08 RAG · Day 09 Multi-agent — **cùng case CS + IT Helpdesk**, hôm nay làm **tầng dữ liệu** trước khi agent "đọc đúng version".
 
-**Slide:** [`../lecture-10.html`](../lecture-10.html)
+**Slide:** [`../lecture-10.html`](../lecture-10.html)  
+**Sinh viên:** 2A202600772 - Vũ Tuấn Phương
 
 ---
 

@@ -28,18 +28,25 @@ WORKER_NAME = "retrieval_worker"
 DEFAULT_TOP_K = 3
 
 
+_embed_fn = None
+
 def _get_embedding_fn():
     """
     Trả về embedding function.
     TODO Sprint 1: Implement dùng OpenAI hoặc Sentence Transformers.
     """
+    global _embed_fn
+    if _embed_fn is not None:
+        return _embed_fn
+
     # Option A: Sentence Transformers (offline, không cần API key)
     try:
         from sentence_transformers import SentenceTransformer
         model = SentenceTransformer("all-MiniLM-L6-v2")
         def embed(text: str) -> list:
             return model.encode([text])[0].tolist()
-        return embed
+        _embed_fn = embed
+        return _embed_fn
     except ImportError:
         pass
 
@@ -50,7 +57,8 @@ def _get_embedding_fn():
         def embed(text: str) -> list:
             resp = client.embeddings.create(input=text, model="text-embedding-3-small")
             return resp.data[0].embedding
-        return embed
+        _embed_fn = embed
+        return _embed_fn
     except ImportError:
         pass
 
@@ -59,7 +67,8 @@ def _get_embedding_fn():
     def embed(text: str) -> list:
         return [random.random() for _ in range(384)]
     print("⚠️  WARNING: Using random embeddings (test only). Install sentence-transformers.")
-    return embed
+    _embed_fn = embed
+    return _embed_fn
 
 
 def _get_collection():

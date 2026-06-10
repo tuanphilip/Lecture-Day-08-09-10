@@ -2,7 +2,8 @@
 
 **Môn:** AI in Action (AICB-P1)  
 **Chủ đề:** RAG Pipeline: Indexing → Retrieval → Generation → Evaluation  
-**Thời gian:** 4 giờ (4 sprints x 60 phút)
+**Thời gian:** 4 giờ (4 sprints x 60 phút)  
+**Sinh viên:** 2A202600772 - Vũ Tuấn Phương
 
 ---
 
